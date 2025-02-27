@@ -18,6 +18,15 @@
   #Find the unique number of products in each department
     df.groupby('department').agg(unique_products=('product_id', pd.Series.nunique))
 
+  # Count the number of unique customers of these 5 departments and commodities by their loyalty type
+    # Note the number of rows, we **must** get 75 (5 departments * 5 commodities * 3 loyalty types = 75)
+    # this will not work as there are commodities appearing in more than one department
+    # (e.g. Salad appearing in Salad Bar department) which will add that department
+      df[df.commodity.isin(top_5c.commodity)] \
+      .groupby(['department', 'commodity', 'loyalty']) \
+      .agg(customer_count=('customer_id', pd.Series.nunique))
+
+
 # Export
 
   # Output results to a CSV file
@@ -25,3 +34,17 @@
 
   # Output results to a CSV file and include the commodity name
     df.groupby(['department', 'product_id' ,'commodity']).agg(total_revenue=('price', sum)).to_csv('unique_commodities_revenue.csv')
+
+# Top 5 etc.
+  #Find the top 5 selling departments by revenue. There is a total of 11 departments
+      top_5d = df.groupby(['department']).agg(total_revenue=('price',sum)) \
+      .sort_values('total_revenue', ascending = False).reset_index().head(5)
+
+  # Get the top selling commodities in the top 5 departments
+
+      tmp = df[df.department.isin(top_5d.department.unique())].groupby(['department', 'commodity']).agg(total_revenue=('price', sum)).reset_index()
+      top_5c = pd.concat(
+      [tmp[tmp.department == hh] \
+      .sort_values('total_revenue', ascending=False) \
+      .head(5) for hh in top_5d.department.unique()]).reset_index(drop=True)
+      top_5c
