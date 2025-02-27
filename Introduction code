@@ -1,0 +1,27 @@
+# Directories
+
+  import pandas as pd
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+
+# Aggregations
+
+  # Find the total revenue for the last four years. Note 2020 data ends June 30.
+    df.transaction_date = pd.to_datetime(df.transaction_date) #Have to change to datetime format
+    df["year"] = df.transaction_date.dt.year
+    tmp = df.groupby(['year']).agg(total_revenue=('price', sum)).reset_index()
+    tmp.head()
+
+# Unique
+
+  #Find the unique number of products in each department
+    df.groupby('department').agg(unique_products=('product_id', pd.Series.nunique))
+
+# Export
+
+  # Output results to a CSV file
+    df.groupby(['department','product_id']).agg(total_revenue=('price', sum)).to_csv('unique_products_revenue.csv')
+
+  # Output results to a CSV file and include the commodity name
+    df.groupby(['department', 'product_id' ,'commodity']).agg(total_revenue=('price', sum)).to_csv('unique_commodities_revenue.csv')
