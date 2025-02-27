@@ -48,3 +48,23 @@
       .sort_values('total_revenue', ascending=False) \
       .head(5) for hh in top_5d.department.unique()]).reset_index(drop=True)
       top_5c
+
+# SQL Join equivalent
+
+  # This will act as a SQL join as it will exclude commodities in an unexpected department
+  # i.e. a commodity must be from only one of the top 5 departments
+  # row count tells us we're right!
+    top_loyalty = df \
+    .merge(top_5c[['department', 'commodity']], on=['department', 'commodity'], how='inner') \
+    .groupby(['department', 'commodity', 'loyalty']) \
+    .agg(customer_count=('customer_id', pd.Series.nunique))
+
+# To solve this, we need to merge the original table with the `top_5c` departments and commodities
+# This will act as a SQL join as it will exclude commodities in an unexpected department
+# i.e. a commodity must be from only one of the top 5 departments
+# row count tells us we're right!
+      top_age_band = df \
+    .merge(top_5c[['department', 'commodity']], on=['department', 'commodity'], how='inner') \
+    .groupby(['department', 'commodity', 'age_band']) \
+    .agg(customer_count=('customer_id', pd.Series.nunique))
+
